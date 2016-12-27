@@ -1,0 +1,6 @@
+UDOO Quad/Dual
+M:	Francesco Montefoschi <francesco.montefoschi@udoo.org>
+S:	Maintained
+F:	board/udoo/quad_dual/
+F:	include/configs/udoo_quad_dual.h
+F:	configs/udoo_quad_dual_defconfig

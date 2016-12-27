@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2013 Freescale Semiconductor, Inc.
+ * Copyright (C) 2015 UDOO Team
  *
  * Author: Fabio Estevam <fabio.estevam@freescale.com>
  *
@@ -69,7 +70,7 @@ static iomux_v3_cfg_t const wdog_pads[] = {
 int mx6_rgmii_rework(struct phy_device *phydev)
 {
 	/*
-	 * Bug: Apparently uDoo does not works with Gigabit switches...
+	 * Bug: Apparently UDOO does not works with Gigabit switches...
 	 * Limiting speed to 10/100Mbps, and setting master mode, seems to
 	 * be the only way to have a successfull PHY auto negotiation.
 	 * How to fix: Understand why Linux kernel do not have this issue.
@@ -230,6 +231,15 @@ int board_early_init_f(void)
 	return 0;
 }
 
+/*
+ * Do not overwrite the console
+ * Use always serial for U-Boot console
+ */
+int overwrite_console(void)
+{
+	return 1;
+}
+
 int board_phy_config(struct phy_device *phydev)
 {
 	mx6_rgmii_rework(phydev);
@@ -265,9 +275,89 @@ int board_late_init(void)
 int checkboard(void)
 {
 	if (is_cpu_type(MXC_CPU_MX6Q))
-		puts("Board: Udoo Quad\n");
+		puts("Board: UDOO Quad\n");
 	else
-		puts("Board: Udoo DualLite\n");
+		puts("Board: UDOO DualLite\n");
 
 	return 0;
 }
+
+
+int isspace(char c)
+{
+	return (c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\12');
+}
+char *trim(char *str)
+{
+	char *end;
+
+	// Trim leading space
+	while(isspace(*str)) str++;
+
+	if(*str == 0)  // All spaces?
+	return str;
+
+	// Trim trailing space
+	end = str + strlen(str) - 1;
+	while(end > str && isspace(*end)) end--;
+
+	// Write new null terminator
+	*(end+1) = 0;
+
+	return str;
+}
+
+/**
+ * After loading uEnv.txt, we autodetect which fdt file we need to load.
+ * uEnv.txt can contain:
+ *  - video_output=hdmi|lvds7|lvds15
+ *    any other value (or if the variable is not specified) will default to "hdmi"
+ *  - use_custom_dtb=true|false
+ *    any other value (or if the variable is not specified) will default to "false"
+ *
+ * Despite the signature, this command does not accept any argument.
+ */
+int do_udooinit(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+{
+	char* modelfdt;
+
+	if (is_cpu_type(MXC_CPU_MX6Q)) {
+		modelfdt = "imx6q-udoo";
+	} else {
+		modelfdt = "imx6dl-udoo";
+	}
+
+	char* video_part = "-hdmi";
+	char* video = getenv("video_output");
+
+	if (video) {
+		video = trim(video);
+		if (strcmp(video, "lvds7") == 0) {
+			video_part = "-lvds7";
+		} else if (strcmp(video, "lvds15") == 0) {
+			video_part = "-lvds15";
+		}
+	}
+
+	char* dir_part = "dts";
+	char* customdtb = getenv("use_custom_dtb");
+	if (customdtb) {
+		customdtb = trim(customdtb);
+		if (strcmp(customdtb, "true") == 0 || strcmp(customdtb, "yes") == 0 || strcmp(customdtb, "enabled") == 0) {
+			dir_part = "dts-overlay";
+		}
+	}
+
+	char fdt_file[100];
+	sprintf(fdt_file, "/boot/%s/%s%s.dtb", dir_part, modelfdt, video_part);
+
+	printf("Device Tree: %s\n", fdt_file);
+	setenv("fdt_file", fdt_file);
+
+	return 0;
+}
+
+U_BOOT_CMD(
+	udooinit,	1,	1,	do_udooinit,
+	"(UDOO) determine the device tree to load", ""
+);
