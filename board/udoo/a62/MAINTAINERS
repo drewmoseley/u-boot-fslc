@@ -1,0 +1,7 @@
+A62 BOARD
+M:	Christian Ege <k4230r6@gmail.com>
+S:	Maintained
+F:	board/udoo/a62/
+F:	include/configs/udoo_a62.h
+F:	configs/udoo_a62_defconfig
+

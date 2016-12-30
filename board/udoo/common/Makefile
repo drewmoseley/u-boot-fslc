@@ -4,4 +4,4 @@
 #
 
 obj- := __dummy__.o
-obj-y  := trim.o
+obj-y  := trim.o udooinit.o
