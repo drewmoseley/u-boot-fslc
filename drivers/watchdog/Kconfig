@@ -62,4 +62,7 @@ config WDT_BCM6345
 	  The watchdog timer is stopped when initialized.
 	  It performs full SoC reset.
 
+config APX_WATCHDOG
+        bool "Support watchdog APX drivers"
+
 endmenu

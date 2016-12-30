@@ -359,6 +359,10 @@ config TARGET_SAMTEC_VINING_2000
 	select DM
 	select DM_THERMAL
 
+config TARGET_UDOO_A62
+	bool "Seco (UDOO) A62 "
+	select SUPPORT_SPL
+
 config TARGET_WANDBOARD
 	bool "wandboard"
 	select BOARD_LATE_INIT
@@ -437,6 +441,7 @@ source "board/toradex/apalis_imx6/Kconfig"
 source "board/toradex/colibri_imx6/Kconfig"
 source "board/udoo/quad_dual/Kconfig"
 source "board/udoo/neo/Kconfig"
+source "board/udoo/a62/Kconfig"
 source "board/wandboard/Kconfig"
 source "board/warp/Kconfig"
 
