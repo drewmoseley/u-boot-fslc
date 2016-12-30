@@ -4,4 +4,5 @@
 # SPDX-License-Identifier:	GPL-2.0+
 #
 
-obj-y  := udoo.o udoo_spl.o
+obj-y  := udoo.o
+obj-$(CONFIG_SPL_BUILD)  += udoo_spl.o
